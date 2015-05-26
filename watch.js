@@ -56,13 +56,11 @@ if (Meteor.isServer) {
                 fs.copySync(sourceFolder, destinationFolder);
                 // Remove stuff we do not need.
                 fs.removeSync(destinationFolder + '/.git');
-              } else {
-                console.log('destination folder already exists...', destinationFolder);
               }
 
               watch.watchTree(sourceFolder, {ignoreDotFiles: true}, function (f, curr, prev) {
                 if (typeof f == 'object' && prev === null && curr === null) {
-                  console.log('include-local-packages finished walking the '+ p + ' tree...');
+                  console.log('robodo:include-local-packages finished walking the '+ p + ' tree...');
                 } else if (prev === null) {
                   console.log(f + ' is a new file...');
                   fs.copySync(f, destinationFolder + '/' + path.basename(f));
