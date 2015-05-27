@@ -8,6 +8,31 @@ if (Meteor.isServer) {
     var watchPackages = [];
 
 
+    var walkSync = function(dir, filelist) {
+      var files = fs.readdirSync(dir);
+      filelist = filelist || [];
+      files.forEach(function(file) {
+      
+        console.log('file',file);
+        // Skip some files.
+        if (file !== '.git' && 
+            file !== '.npm' && 
+            file !== '.DS_Store')
+        {
+
+          if (fs.statSync(dir + file).isDirectory()) 
+          {
+
+            filelist = walkSync(dir + file + '/', filelist);
+          }
+          else {
+            filelist.push(dir + file);
+          }
+        }
+      });
+      return filelist;
+    };
+
     var parsePackageFile = function (packagesFile, callback) {
       var packages = [];
       readline.createInterface({
@@ -26,15 +51,16 @@ if (Meteor.isServer) {
       });
     };
 
+    var packageName = 'robodo:include-local-packages';
     var installedPackagesFile = process.env.PWD + '/.meteor/packages';
     var packagesFile = process.env.PWD + '/include-local-packages';
     var packagesPath = path.resolve(packagesFile);
 
     if(!fs.existsSync(packagesPath)) {
       console.log('\n');
-      console.log('-> Creating `include-local-packages for the first time.');
-      console.log('-> Add local packages you want to include in your app package folder');
-      console.log('-> to file `include-local-packages` and restart your app.');
+      console.log(packageName + '-> Creating `include-local-packages for the first time.');
+      console.log(packageName + '-> Add local packages you want to include in your app package folder');
+      console.log(packageName + '-> to file `include-local-packages` and restart your app.');
       console.log();
       fs.writeFileSync(packagesPath, '');
     }
@@ -51,25 +77,26 @@ if (Meteor.isServer) {
               var sourceFolder = process.env.PACKAGE_DIRS + '/' + p;
               var destinationFolder = process.env.PWD + '/packages/include-local-packages-' + p;
               if (!fs.existsSync(destinationFolder)) {
-                console.log('create destination folder package', p);
-                fs.removeSync(destinationFolder);
-                fs.copySync(sourceFolder, destinationFolder);
-                // Remove stuff we do not need.
-                fs.removeSync(destinationFolder + '/.git');
+
+                console.log(packageName + '-> inital folder copy...', p);
+                var files = walkSync(sourceFolder + '/');
+                _.each(files, function(f) {
+                  fs.copySync(f, destinationFolder + '/' + f.substring(sourceFolder.length+1,f.length));
+                });
               }
 
               watch.watchTree(sourceFolder, {ignoreDotFiles: true}, function (f, curr, prev) {
                 if (typeof f == 'object' && prev === null && curr === null) {
-                  console.log('robodo:include-local-packages finished walking the '+ p + ' tree...');
+                  console.log(packageName + '-> finished walking the '+ p + ' tree...');
                 } else if (prev === null) {
-                  console.log(f + ' is a new file...');
-                  fs.copySync(f, destinationFolder + '/' + path.basename(f));
+                  console.log(packageName + '-> '+ f + ' is a new file...');
+                  fs.copySync(f, destinationFolder + '/' + f.substring(sourceFolder.length+1,f.length));
                 } else if (curr.nlink === 0) {
-                  console.log(f + ' was removed...');
-                  fs.removeSync(destinationFolder + '/' + path.basename(f));
+                  console.log(packageName + '-> '+ f + ' was removed...');
+                  fs.removeSync(destinationFolder + '/' + f.substring(sourceFolder.length+1,f.length));
                 } else {
-                  console.log(f + ' was changed');
-                  fs.copySync(f, destinationFolder + '/' + path.basename(f));
+                  console.log(packageName + '-> '+ f + ' was changed');
+                  fs.copySync(f, destinationFolder + '/' + f.substring(sourceFolder.length+1,f.length));
                 }
               });
              
@@ -80,7 +107,7 @@ if (Meteor.isServer) {
       });
 
     } else {
-      console.log('-> Error: `include-local-packages` not found.');
+      console.log(packageName + '-> Error: `include-local-packages` not found.');
     }
 
 
