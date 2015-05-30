@@ -1,7 +1,7 @@
 Package.describe({
   name: 'robodo:include-local-packages',
   summary: 'Include private packages in your meteor app `packages` folder.',
-  version: '0.0.2',
+  version: '0.0.3',
   git: 'https://github.com/orangewise/robodo-include-local-packages',
   debugOnly: true
 });
