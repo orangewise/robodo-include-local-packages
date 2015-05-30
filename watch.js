@@ -133,8 +133,8 @@ if (Meteor.isServer) {
                })
             );
             var removePackages = _.difference(packagesFromFolder,watchPackages);
-            console.log(packageName + '-> housekeeping, cleanup',removePackages);
             _.each(removePackages, function (p) {
+              console.log(packageName + '-> housekeeping, cleanup',p);
               fs.removeSync(destination + p);
             });
 
