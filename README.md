@@ -29,6 +29,11 @@ robodo:masonrify
 
 The packages syncs and watches your local private packages that you maintain in your $PACKAGES_DIRS folder to your app/packages folder.
 
+# TODO
+
+ - Remove localally included package when package is removed from file include-local-packages. 
+
+
 # License
 
 The code is licensed under the [MIT License](LICENSE).
