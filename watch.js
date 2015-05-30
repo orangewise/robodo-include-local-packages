@@ -28,7 +28,6 @@ if (Meteor.isServer) {
           }
           else {
             filelist.push(dir + file);
-            console.log('include',file);
           }
         }
       });
@@ -80,6 +79,7 @@ if (Meteor.isServer) {
               var destinationFolder = process.env.PWD + '/packages/include-local-packages-' + p;
               var files = walkSync(sourceFolder + '/');
 
+              console.log(packageName + '->', p);
               if (!fs.existsSync(destinationFolder)) {
                 console.log(packageName + '-> init files...', p);
                 _.each(files, function(f) {
