@@ -86,7 +86,7 @@ if (Meteor.isServer) {
                   fs.copySync(f, destinationFolder + '/' + f.substring(sourceFolder.length+1,f.length));
                 });
               } else {
-                console.log('refresh package.js');
+                console.log(packageName + '->', 'refresh package.js');
                 _.each([sourceFolder + '/package.js'], function(f) {
                   fs.copySync(f , destinationFolder + '/' + f.substring(sourceFolder.length+1,f.length));
                 });
