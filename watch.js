@@ -94,6 +94,8 @@ if (Meteor.isServer) {
               var files = walkSync(sourceFolder + '/');
 
               console.log(packageName + '->', p);
+
+              // Create folders at startup.
               if (!fs.existsSync(destinationFolder)) {
                 console.log(packageName + '-> init files...', p);
                 _.each(files, function(f) {
@@ -106,6 +108,7 @@ if (Meteor.isServer) {
                 });
               }
 
+              // Watch folders while app is running.              
               watch.watchTree(sourceFolder, {ignoreDotFiles: true}, function (f, curr, prev) {
                 if (typeof f == 'object' && prev === null && curr === null) {
                   console.log(packageName + '-> finished walking the '+ p + ' tree...');
