@@ -12,21 +12,23 @@ if (Meteor.isServer) {
       var files = fs.readdirSync(dir);
       filelist = filelist || [];
       files.forEach(function(file) {
-      
-        console.log('file',file);
+         
         // Skip some files.
         if (file !== '.git' && 
             file !== '.npm' && 
+            // exclude folder with example app
+            file.substring(file.length-8,file.length) !== 'example' &&
+            file.substring(0,7) !== '.build.' &&
             file !== '.DS_Store')
         {
 
           if (fs.statSync(dir + file).isDirectory()) 
           {
-
             filelist = walkSync(dir + file + '/', filelist);
           }
           else {
             filelist.push(dir + file);
+            console.log('include',file);
           }
         }
       });
@@ -76,12 +78,17 @@ if (Meteor.isServer) {
 
               var sourceFolder = process.env.PACKAGE_DIRS + '/' + p;
               var destinationFolder = process.env.PWD + '/packages/include-local-packages-' + p;
-              if (!fs.existsSync(destinationFolder)) {
+              var files = walkSync(sourceFolder + '/');
 
-                console.log(packageName + '-> inital folder copy...', p);
-                var files = walkSync(sourceFolder + '/');
+              if (!fs.existsSync(destinationFolder)) {
+                console.log(packageName + '-> init files...', p);
                 _.each(files, function(f) {
                   fs.copySync(f, destinationFolder + '/' + f.substring(sourceFolder.length+1,f.length));
+                });
+              } else {
+                console.log('refresh package.js');
+                _.each([sourceFolder + '/package.js'], function(f) {
+                  fs.copySync(f , destinationFolder + '/' + f.substring(sourceFolder.length+1,f.length));
                 });
               }
 
