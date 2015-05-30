@@ -8,6 +8,19 @@ if (Meteor.isServer) {
     var watchPackages = [];
 
 
+   var walkSyncPackages = function(dir, filelist) {
+      var files = fs.readdirSync(dir);
+      filelist = filelist || [];
+      files.forEach(function(file) {
+         
+          if (fs.statSync(dir + file).isDirectory()) 
+          {
+            filelist.push(dir + file);
+          }
+      });
+      return filelist;
+    };
+
     var walkSync = function(dir, filelist) {
       var files = fs.readdirSync(dir);
       filelist = filelist || [];
@@ -56,6 +69,7 @@ if (Meteor.isServer) {
     var installedPackagesFile = process.env.PWD + '/.meteor/packages';
     var packagesFile = process.env.PWD + '/include-local-packages';
     var packagesPath = path.resolve(packagesFile);
+    var destination = process.env.PWD + '/packages/include-local-packages-';
 
     if(!fs.existsSync(packagesPath)) {
       console.log('\n');
@@ -108,8 +122,26 @@ if (Meteor.isServer) {
               });
              
             });
+
+            // Cleanup packages that are not present in include-local-packages.
+            var includedPackageFolders = walkSyncPackages(process.env.PWD + '/packages/');
+            var packagesFromFolder = _.compact(
+              _.map(includedPackageFolders,function (f) {
+                if (f.substring(0,destination.length) === destination) {
+                  return f.substring(destination.length,f.length);
+                }
+               })
+            );
+            var removePackages = _.difference(packagesFromFolder,watchPackages);
+            console.log(packageName + '-> housekeeping, cleanup',removePackages);
+
           });
+
+
+
+
         }
+
 
       });
 
