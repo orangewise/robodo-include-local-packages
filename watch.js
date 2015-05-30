@@ -90,7 +90,7 @@ if (Meteor.isServer) {
             _.each(watchPackages, function (p) {
 
               var sourceFolder = process.env.PACKAGE_DIRS + '/' + p;
-              var destinationFolder = process.env.PWD + '/packages/include-local-packages-' + p;
+              var destinationFolder = destination + p;
               var files = walkSync(sourceFolder + '/');
 
               console.log(packageName + '->', p);
@@ -134,6 +134,9 @@ if (Meteor.isServer) {
             );
             var removePackages = _.difference(packagesFromFolder,watchPackages);
             console.log(packageName + '-> housekeeping, cleanup',removePackages);
+            _.each(removePackages, function (p) {
+              fs.removeSync(destination + p);
+            });
 
           });
 
